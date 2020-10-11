@@ -1,0 +1,11 @@
+[package]
+name = "bevy-sparks"
+version = "0.1.0"
+authors = ["Per Edwardsson <per@peredwardsson.se>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bevy = { git = "https://github.com/bevyengine/bevy" }
+rand = "0.7.3"
