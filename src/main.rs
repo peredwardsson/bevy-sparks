@@ -12,8 +12,7 @@ fn main() {
     App::build()
     .add_default_plugins()
     .add_startup_system(setup.system())
-    //.add_plugin(ScheduleRunnerPlugin::run_loop(Duration::from_secs(1)))
-    //.add_system(spawn_some_particles.system())
+    // Unsure if this staging is necessary but perhaps it's not bad to keep it tidy.
     .add_system_to_stage(stage::UPDATE, update_position.system())
     .add_system_to_stage(stage::UPDATE, update_velocity.system())
     .add_system_to_stage(stage::UPDATE, update_life.system())
@@ -54,6 +53,7 @@ fn setup(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mut materials
         .with(ParticleSystem)
         .with(SpawnFrequency(Timer::new(Duration::from_millis(200), true)))
         .with(Radius(0.05))
-        .with(Position(Vec3::new(0.0, 0.0, 0.0)))
+        .with(Transform::from_translation(Vec3::new(0.0, 0.0, 0.0)))
+        .with(Velocity(Vec3::new(0.0, 1.0, 0.0)))
         ;
 }

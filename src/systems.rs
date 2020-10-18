@@ -3,16 +3,15 @@ use rand::Rng;
 use crate::components::*;
 
 
-pub fn update_velocity(mut query: Query<(&mut Velocity, &Acceleration)>) {
+pub fn update_velocity(time: Res<Time>, mut query: Query<(&mut Velocity, &Acceleration)>) {
     for (mut vel, acc) in &mut query.iter() {
-        vel.0 += acc.0;
+        vel.0 += acc.0 * time.delta_seconds;
     }
 }
 
-pub fn update_position(mut query: Query<(&mut Transform, &Velocity)>) {
+pub fn update_position(time: Res<Time>, mut query: Query<(&mut Transform, &Velocity)>) {
     for (mut transform, vel) in &mut query.iter() {
-        transform.translate(vel.0);
-        //println!("Updating pos: {:?}", pos);
+        transform.translate(vel.0 * time.delta_seconds);
     }
 }
 
@@ -30,18 +29,17 @@ pub fn spawn_particles(
     time: Res<Time>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut query: Query<(&ParticleSystem, &mut SpawnFrequency, &Position, &Radius)>, 
-
+    mut query: Query<(&ParticleSystem, &mut SpawnFrequency, &Transform, &Radius)>, 
 ) {
-    for (_ps, mut hz, position, radius) in &mut query.iter() {
+    for (_ps, mut hz, transform, radius) in &mut query.iter() {
         (*hz).0.tick(time.delta_seconds);
         if hz.0.just_finished {
             let mut rng = rand::thread_rng();
-            let mut rand_vel: Velocity = rng.gen();
-                rand_vel.0 /= 100.0;
+            let rand_vel: Velocity = rng.gen();
             let rand_lifetime: Lifetime = rng.gen();
 
-            let pos = Transform::from_translation(position.0);
+            //let pos = Transform::from_translation(position.0);
+            //println!("{}", pos);
 
             commands
                 .spawn(PbrComponents{
@@ -55,7 +53,7 @@ pub fn spawn_particles(
                 })
                 .with(Particle)
                 .with(rand_vel)
-                .with(pos)
+                .with(transform.clone())
                 .with(Acceleration::default())
                 .with(rand_lifetime)
                 ;
