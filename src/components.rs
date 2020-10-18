@@ -1,4 +1,6 @@
 use bevy::math::Vec3;
+use bevy::prelude::Timer;
+
 use rand::Rng;
 use rand::distributions::{Distribution, Standard};
 
@@ -23,4 +25,19 @@ pub struct Acceleration(pub Vec3);
 
 pub struct Particle;
 
+#[derive(Default, Debug)]
+pub struct Lifetime(pub f32);
 
+impl Distribution<Lifetime> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Lifetime {
+        let life: f32 = rng.gen();
+        let scaling_factor = 3.0;
+        Lifetime(life*scaling_factor)
+    }
+}
+
+pub struct SpawnFrequency(pub Timer);
+
+pub struct ParticleSystem;
+
+pub struct Radius(pub f32);
