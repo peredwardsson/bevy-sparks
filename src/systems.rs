@@ -49,11 +49,11 @@ pub fn spawn_particles(
                         ..Default::default()
                     })),
                     material: materials.add(Color::rgb(0.9, 0.7, 0.7).into()),
+                    transform: transform.clone(),
                     ..Default::default()
                 })
                 .with(Particle)
                 .with(rand_vel)
-                .with(transform.clone())
                 .with(Acceleration::default())
                 .with(rand_lifetime)
                 ;
