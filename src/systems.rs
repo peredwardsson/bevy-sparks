@@ -24,6 +24,21 @@ pub fn update_life(mut commands: Commands, time: Res<Time>, mut query: Query<(&m
     }
 }
 
+pub fn update_circular_motion( time: Res<Time>, mut query: Query<(&mut Velocity, &CircularMotion)>) {
+    for (mut vel, _) in &mut query.iter() {
+        let mut ang_vel: Vec3 = Vec3::unit_x()*time.delta_seconds;
+        if ang_vel.max_element() == 0.0 {
+            ang_vel = Vec3::unit_x();
+        }
+        //println!("{:?}", vel);
+        //println!("{:?}", ang_vel);
+        let scaling_factor = 1.0;
+        let dv: Vec3 = vel.0.cross(ang_vel) * scaling_factor;
+        vel.0 = vel.0 + dv;
+        vel.0 = vel.0.normalize();
+    }
+}
+
 pub fn spawn_particles(
     mut commands: Commands, 
     time: Res<Time>,

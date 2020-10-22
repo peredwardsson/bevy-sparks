@@ -7,7 +7,7 @@ use rand::distributions::{Distribution, Standard};
 #[derive(Default, Debug)]
 pub struct Position(pub Vec3);
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct Velocity(pub Vec3);
 
 impl Distribution<Velocity> for Standard {
@@ -58,3 +58,5 @@ impl FromResources for ButtonMaterials {
         }
     }
 }
+
+pub struct CircularMotion;

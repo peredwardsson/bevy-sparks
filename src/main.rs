@@ -19,10 +19,11 @@ fn main() {
     .add_system_to_stage(stage::UPDATE, update_velocity.system())
     .add_system_to_stage(stage::UPDATE, update_life.system())
     .add_system_to_stage(stage::POST_UPDATE, spawn_particles.system())
+    .add_system_to_stage(stage::UPDATE, update_circular_motion.system())
     .run();
 }
 
-fn setup(mut commands: Commands, mut materials: Res<ButtonMaterials>) {
+fn setup(mut commands: Commands, materials: Res<ButtonMaterials>, asset_server: Res<AssetServer>) {
     commands
         .spawn(Camera3dComponents {
             transform: Transform::new(Mat4::face_toward(
@@ -54,7 +55,7 @@ fn setup(mut commands: Commands, mut materials: Res<ButtonMaterials>) {
                 // center button
                 margin: Rect::all(Val::Px(5.0)),
                 // horizontally center child text
-                justify_content: JustifyContent::Center,
+                justify_content: JustifyContent::FlexStart,
                 // vertically center child text
                 align_items: AlignItems::Center,
                 ..Default::default()
@@ -62,14 +63,21 @@ fn setup(mut commands: Commands, mut materials: Res<ButtonMaterials>) {
             material: materials.normal,
             ..Default::default()
         })
-            .with_child(|parent| {
-                parent.spawn(
-                    TextComponents {
-                        
-                    }
-                )
-            })
-        ;
+            .with_children(|parent| {
+                parent.spawn(TextComponents {
+                    text: Text {
+                        value: "Status".to_string(),
+                        font: asset_server.load("assets/fonts/FiraMono-Regular.ttf").unwrap(),
+                        style: TextStyle {
+                            font_size: 20.0,
+                            color: Color::rgb(0.9, 0.9, 0.9),
+                        },
+                    },
+                    ..Default::default()
+                }
+                );
+            });
+        
 }
 
 
@@ -90,5 +98,6 @@ fn add_particle_system(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>,
         .with(ParticleSystem)
         .with(SpawnFrequency(Timer::new(Duration::from_millis(100), true)))
         .with(Radius(0.05))
-        .with(Velocity(Vec3::new(0.0, 1.0, 0.0)));
+        .with(Velocity(Vec3::new(0.0, 1.0, 0.0)))
+        .with(CircularMotion);
 }
