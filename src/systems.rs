@@ -38,9 +38,6 @@ pub fn spawn_particles(
             let rand_vel: Velocity = rng.gen();
             let rand_lifetime: Lifetime = rng.gen();
 
-            //let pos = Transform::from_translation(position.0);
-            //println!("{}", pos);
-
             commands
                 .spawn(PbrComponents{
                     mesh: meshes.add(Mesh::from(shape::Icosphere {

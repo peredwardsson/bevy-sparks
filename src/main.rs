@@ -11,6 +11,7 @@ use std::time::Duration;
 fn main() {
     App::build()
     .add_default_plugins()
+    .init_resource::<ButtonMaterials>()
     .add_startup_system(setup.system())
     .add_startup_system(add_particle_system.system())
     // Unsure if this staging is necessary but perhaps it's not bad to keep it tidy.
@@ -21,7 +22,7 @@ fn main() {
     .run();
 }
 
-fn setup(mut commands: Commands) {
+fn setup(mut commands: Commands, mut materials: Res<ButtonMaterials>) {
     commands
         .spawn(Camera3dComponents {
             transform: Transform::new(Mat4::face_toward(
@@ -45,7 +46,30 @@ fn setup(mut commands: Commands) {
         .spawn(LightComponents{
             global_transform: GlobalTransform::from_translation(Vec3::new(0.0, 0.0,100.0)),
             ..Default::default()
-        });
+        })
+        .spawn(UiCameraComponents::default())
+        .spawn(NodeComponents {
+            style: Style {
+                size: Size::new(Val::Px(250.0), Val::Px(65.0)),
+                // center button
+                margin: Rect::all(Val::Px(5.0)),
+                // horizontally center child text
+                justify_content: JustifyContent::Center,
+                // vertically center child text
+                align_items: AlignItems::Center,
+                ..Default::default()
+            },
+            material: materials.normal,
+            ..Default::default()
+        })
+            .with_child(|parent| {
+                parent.spawn(
+                    TextComponents {
+                        
+                    }
+                )
+            })
+        ;
 }
 
 
