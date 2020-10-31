@@ -1,8 +1,18 @@
-use bevy::math::Vec3;
-use bevy::prelude::*;
+use std::time::Duration;
+
+use bevy::{
+    asset::*, 
+    math::Vec3, 
+    prelude::*, 
+    utils::*,
+    type_registry::TypeUuid,
+};
 
 use rand::Rng;
 use rand::distributions::{Distribution, Standard};
+use ron::de;
+use serde::Deserialize;
+use anyhow::Error;
 
 #[derive(Default, Debug)]
 pub struct Position(pub Vec3);
@@ -59,4 +69,44 @@ impl FromResources for ButtonMaterials {
     }
 }
 
-pub struct CircularMotion;
+pub struct CircularMotion {
+    pub angular_velocity: Vec3
+}
+
+
+
+#[derive(Debug, Default, Deserialize, TypeUuid)]
+#[uuid = "a48e9156-1b55-11eb-adc1-0242ac120002"]
+pub struct ParticleSystemSettings {
+    pub position: Vec3,
+    pub color: Color,
+    pub frequency_ms: u64,
+    pub velocity: Vec3,
+    pub radius: f32,
+    pub angular_velocity: bool
+}
+
+#[derive(Default)]
+pub struct ParticleSystemSettingsAssetLoader;
+
+impl AssetLoader for ParticleSystemSettingsAssetLoader {
+    fn load<'a>(
+        &'a self,
+        bytes: &'a [u8],
+        load_context: &'a mut LoadContext,
+    ) -> BoxedFuture<'a, Result<(), anyhow::Error>> {
+        Box::pin(async move {
+            let path = load_context.path();
+            println!("Got the following path: {}", path.display());
+            let contents = std::str::from_utf8(bytes).unwrap();
+            println!("Contents:\n{:?}", contents);
+            let settings: ParticleSystemSettings = serde_json::from_str(contents).unwrap();
+            println!("{:?}", settings);
+            Ok(())
+        })
+    }
+
+    fn extensions(&self) -> &[&str] {
+        &["json"]
+    }
+}
