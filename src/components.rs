@@ -1,5 +1,3 @@
-use std::time::Duration;
-
 use bevy::{
     asset::*, 
     math::Vec3, 
@@ -10,9 +8,8 @@ use bevy::{
 
 use rand::Rng;
 use rand::distributions::{Distribution, Standard};
-use ron::de;
 use serde::Deserialize;
-use anyhow::Error;
+use serde_json::Value;
 
 #[derive(Default, Debug)]
 pub struct Position(pub Vec3);
@@ -83,7 +80,7 @@ pub struct ParticleSystemSettings {
     pub frequency_ms: u64,
     pub velocity: Vec3,
     pub radius: f32,
-    pub angular_velocity: bool
+    pub angular_velocity: Vec3
 }
 
 #[derive(Default)]
@@ -97,11 +94,15 @@ impl AssetLoader for ParticleSystemSettingsAssetLoader {
     ) -> BoxedFuture<'a, Result<(), anyhow::Error>> {
         Box::pin(async move {
             let path = load_context.path();
-            println!("Got the following path: {}", path.display());
+            println!("PS loaded: {}", path.display());
             let contents = std::str::from_utf8(bytes).unwrap();
-            println!("Contents:\n{:?}", contents);
-            let settings: ParticleSystemSettings = serde_json::from_str(contents).unwrap();
-            println!("{:?}", settings);
+            //let s = serde_json::from_str(contents);
+            if let Ok(s) = serde_json::from_str::<ParticleSystemSettings>(contents) {
+                println!("Settings: {:?}", &s);
+                load_context.set_default_asset(LoadedAsset::new(s));
+                println!("Set the load context successfully");
+            }
+            //let settings = serde_json::from_str(contents);
             Ok(())
         })
     }
@@ -109,4 +110,20 @@ impl AssetLoader for ParticleSystemSettingsAssetLoader {
     fn extensions(&self) -> &[&str] {
         &["json"]
     }
+}
+
+#[derive(Debug, Default)]
+pub struct SpawnCounter {
+    pub spawned: i32,
+    pub max_spawn: i32,
+}
+
+#[derive(Bundle, Default, Debug)]
+pub struct ParticleSystemSpawner {
+    // pub ps_handle: Handle<ParticleSystemSettings>,
+    pub name: String,
+}
+
+pub struct ParticleSystemSettingsHandle {
+    pub handle: Handle<ParticleSystemSettings>,
 }
