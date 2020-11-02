@@ -9,7 +9,6 @@ use bevy::{
 use rand::Rng;
 use rand::distributions::{Distribution, Standard};
 use serde::Deserialize;
-use serde_json::Value;
 
 #[derive(Default, Debug)]
 pub struct Position(pub Vec3);
@@ -42,6 +41,9 @@ impl Distribution<Lifetime> for Standard {
         Lifetime(life*scaling_factor)
     }
 }
+
+#[derive(Default, Debug)]
+pub struct SystemLifetime(pub f32);
 
 pub struct SpawnFrequency(pub Timer);
 

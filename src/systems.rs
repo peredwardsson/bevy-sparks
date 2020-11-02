@@ -39,9 +39,9 @@ pub fn spawn_particles(
     time: Res<Time>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut query: Query<(&ParticleSystem, &mut SpawnFrequency, &Transform, &Radius)>, 
+    mut query: Query<(&ParticleSystem, &mut SpawnFrequency, &Transform, &Radius, &SystemLifetime, &Color)>, 
 ) {
-    for (_ps, mut hz, transform, radius) in query.iter_mut(){
+    for (_ps, mut hz, transform, radius, _lifetime, color) in query.iter_mut(){
         (*hz).0.tick(time.delta_seconds);
         if hz.0.just_finished {
             let mut rng = rand::thread_rng();
@@ -55,7 +55,7 @@ pub fn spawn_particles(
                         radius: radius.0,
                         ..Default::default()
                     })),
-                    material: materials.add(Color::rgb(0.9, 0.7, 0.7).into()),
+                    material: materials.add((*color).into()),
                     transform: transform.clone(),
                     ..Default::default()
                 })

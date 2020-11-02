@@ -25,16 +25,12 @@ fn main() {
         .add_system_to_stage(stage::UPDATE, update_position.system())
         .add_system_to_stage(stage::UPDATE, update_velocity.system())
         .add_system_to_stage(stage::UPDATE, update_life.system())
-        .add_system_to_stage(stage::POST_UPDATE, spawn_particles.system())
         .add_system_to_stage(stage::UPDATE, update_circular_motion.system())
+        .add_system_to_stage(stage::POST_UPDATE, spawn_particles.system())
         .run();
 }
 
-fn setup(mut commands: Commands, asset_server: ResMut<AssetServer>) {
-    
-    // TODO:
-    // - Figure out a way to deal with spawning things based on handles 
-    
+fn setup(mut commands: Commands) {
     
     commands
         .spawn(Camera3dComponents {
@@ -51,11 +47,6 @@ fn setup(mut commands: Commands, asset_server: ResMut<AssetServer>) {
             ..Default::default()
         })
         .spawn(UiCameraComponents::default())
-        // .spawn(ParticleSystemSpawner {
-        //     ps_handle: asset_server.load("../assets/ps/ps1.json"),
-        //     spawned: 0,
-        //     max_spawn: 1,
-        // })
         ;
     }
 
@@ -116,15 +107,9 @@ fn add_particle_system(
     ps_settings: Res<Assets<ParticleSystemSettings>>,
     mut ps_query: Query<(&ParticleSystemSettingsHandle, &mut SpawnCounter)>
 ) {
-    // This should really not be a thing for particle systems.
     
-
-    // let ps_setting: Handle<ParticleSystemSettings> = asset_server.get_handle("../assets/ps/ps1.json");
-    //println!("Checking if PS is found...");1
     for (handler, mut spawn_counter) in ps_query.iter_mut() {
-        // println!("Got ps_spawner");
         if let Some(ps) = ps_settings.get(&handler.handle){
-            // println!("Found this PS: {:?}", ps);
             let ps_mesh = Mesh::from(shape::Icosphere {
                 subdivisions: 1,
                 radius: 1e-9,
@@ -144,24 +129,26 @@ fn add_particle_system(
                 .with(SpawnFrequency(Timer::new(Duration::from_millis(ps.frequency_ms), true)))
                 .with(Radius(ps.radius))
                 .with(Velocity(ps.velocity))
-                .with(CircularMotion{angular_velocity: ps.angular_velocity});
+                .with(CircularMotion{angular_velocity: ps.angular_velocity})
+                .with(Color::from(ps.color))
+                .with(SystemLifetime(3.1));
             (*spawn_counter).spawned += 1;
         }
     }    
 }
 
 
-pub fn create_ps_from_files(mut commands: Commands, mut asset_server: Res<AssetServer>) {
+pub fn create_ps_from_files(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     for path in glob("assets/ps/*").expect("No particle systems found.") {
-        //println!("{}", path.unwrap().display());
         if let Ok(p) = path {
-            println!("Found a PS to add");
+
             let mut pathmod = PathBuf::from("..\\");
             pathmod.push(p);
-            println!("Loading PS...");
+
             let handle: Handle<ParticleSystemSettings> = asset_server.load(pathmod);
-            println!("PS loaded. Adding entity");
+            asset_server.watch_for_changes().unwrap();
+
             commands
                 .spawn(ParticleSystemSpawner {
                     name: "ps1".into(),
